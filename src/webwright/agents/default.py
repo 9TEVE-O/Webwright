@@ -422,6 +422,25 @@ class DefaultAgent:
                     },
                 )
             )
+        lab_config = self.extra_template_vars.get("lab", {})
+        if lab_config.get("enabled"):
+            from webwright.lab.intake import check_domain_allowlist
+
+            allowlist = lab_config.get("tier_1_allowlist", [])
+            for action in extra.get("actions", []):
+                code = action.get("python_code", "") or action.get("bash_command", "")
+                violation = check_domain_allowlist(code, allowlist)
+                if violation:
+                    return self.add_messages(
+                        self.model.format_message(
+                            role="user",
+                            content=(
+                                f"LAB intake gate blocked this action: {violation}\n\n"
+                                "Revise your approach to use only LAB-approved domains."
+                            ),
+                            extra={"interrupt_type": "LABIntakeGate"},
+                        )
+                    )
         outputs = [self.env.execute(action) for action in extra.get("actions", [])]
         self._write_debug_step_artifact(step_index=self.n_calls, assistant_message=message, outputs=outputs)
         observation_messages = self.model.format_observation_messages(message, outputs, self.get_template_vars())
