@@ -87,6 +87,17 @@ def run_one(
     env = get_environment(config.get("environment", {}))
     agent = get_agent(model, env, config.get("agent", {}), default_type="default")
 
+    lab_config = config.get("lab", {})
+    if lab_config.get("enabled"):
+        from webwright.lab.intake import append_audit_log, build_audit_record, classify_task
+
+        lab_tier = classify_task(resolved_task)
+        lab_audit = build_audit_record(resolved_task, lab_tier, resolved_task_id)
+        append_audit_log(lab_config.get("audit_log_path"), lab_audit)
+        agent.extra_template_vars["lab"] = lab_config
+        agent.extra_template_vars["lab_tier"] = lab_tier.value
+        console.print(f"LAB intake: Tier {lab_tier.value} — {lab_tier.name}")
+
     console.print(f"Running task in [bold green]{resolved_output_dir}[/bold green]")
     run_exception: Exception | None = None
     close_exception: Exception | None = None

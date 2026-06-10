@@ -1,0 +1,47 @@
+# LAB Safe Intake config — stack on top of base.yaml + local_browser.yaml + model_*.yaml
+#
+# Usage:
+#   webwright -c base.yaml -c local_browser.yaml -c model_claude.yaml -c lab_intake.yaml \
+#     -t "Check what AI tools shipped this week on musictech.net"
+#
+# Governance tiers:
+#   Tier 1  Public research, no artist identity — allowlist check + audit log
+#   Tier 2  Artist-adjacent request — identity flag + audit log
+#   Tier 3  Artist-facing output — citation requirement flag + audit log
+
+lab:
+  enabled: true
+
+  # Domains the agent is permitted to navigate to.
+  # A goto() call targeting any other domain is blocked before execution.
+  tier_1_allowlist:
+    - musictech.net
+    - billboard.com
+    - splice.com
+    - landr.com
+    - izotope.com
+    - pluginboutique.com
+    - residentadvisor.net
+    - cdm.link
+    - soundonsound.com
+    - gearspace.com
+    - musicradar.com
+    - synthtopia.com
+    - youtube.com
+    - spotify.com
+    - soundcloud.com
+    - bandcamp.com
+    - distrokid.com
+    - tunecore.com
+    - apple.com
+    - tidal.com
+    - amazon.com
+
+  # Tier 2: require artist name to be present in the audit record.
+  require_artist_name_in_audit: true
+
+  # Tier 3: flag output as requiring human citation review before delivery.
+  require_citation_marker: true
+
+  # Every LAB run appends one JSON line here.
+  audit_log_path: outputs/lab_audit.jsonl
